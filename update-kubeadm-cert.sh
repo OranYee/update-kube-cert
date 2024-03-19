@@ -254,7 +254,9 @@ cert::update_etcd_cert() {
       docker ps | awk '/k8s_etcd/{print$1}' | xargs -r -I '{}' docker restart {} >/dev/null 2>&1 || true
       ;;
     "containerd")
-      crictl ps | awk '/etcd-/{print$(NF-1)}' | xargs -r -I '{}' crictl stopp {} >/dev/null 2>&1 || true
+      # List pods information by command: crictl pods
+      #  crictl ps | awk '/etcd-/{print$(NF-1)}' | xargs -r -I '{}' crictl stopp {} >/dev/null 2>&1 || true
+      crictl pods| awk '/etcd-/{print$1}'| xargs -r -I '{}' crictl stopp {} >/dev/null 2>&1 || true
       ;;
   esac
   log::info "restarted etcd with ${CRI}"
@@ -325,7 +327,9 @@ cert::update_master_cert() {
         docker ps | awk '/k8s_kube-'${item}'/{print$1}' | xargs -r -I '{}' docker restart {} >/dev/null 2>&1 || true
         ;;
       "containerd")
-        crictl ps | awk '/kube-'${item}'-/{print $(NF-1)}' | xargs -r -I '{}' crictl stopp {} >/dev/null 2>&1 || true
+        # List pods information by command: crictl pods
+        crictl pods| awk '/kube-'${item}'-/{print$1}'| xargs -r -I '{}' crictl stopp {} >/dev/null 2>&1 || true
+        # crictl ps | awk '/kube-'${item}'-/{print $(NF-1)}' | xargs -r -I '{}' crictl stopp {} >/dev/null 2>&1 || true
         ;;
     esac
     log::info "restarted ${item} with ${CRI}"
